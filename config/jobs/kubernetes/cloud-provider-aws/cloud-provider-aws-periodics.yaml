@@ -40,6 +40,8 @@ periodics:
       - make
       - test-e2e
       - KOPS_STATE_STORE=s3://cloud-provider-aws-shared-e2e
+      - AWS_REGION=us-east-1
+      - S3_REGION=us-east-1
       securityContext:
         privileged: true
 - interval: 6h
@@ -83,6 +85,8 @@ periodics:
       - make
       - test-e2e-latest-k8s
       - KOPS_STATE_STORE=s3://cloud-provider-aws-shared-e2e
+      - AWS_REGION=us-east-1
+      - S3_REGION=us-east-1
       securityContext:
         privileged: true
 - interval: 6h

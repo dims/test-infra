@@ -49,7 +49,7 @@ presubmits:
             memory: 4Gi
     annotations:
       testgrid-dashboards: provider-aws-load-balancer-controller
-      testgrid-tab-name: unit test
+      testgrid-tab-name: unit-alb-test
       description: aws load balancer controller unit tests
       testgrid-num-columns-recent: '30'
   - name: pull-aws-load-balancer-controller-e2e-test

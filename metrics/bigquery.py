@@ -104,15 +104,15 @@ def _extract_jobs_from_config(config):
         return jobs
 
     # Extract presubmit job names (with 'pr:' prefix for metrics)
-    for repo_jobs in config.get('presubmits', {}).values():
+    for repo_jobs in (config.get('presubmits') or {}).values():
         jobs.update(_extract_job_names(repo_jobs, prefix='pr:'))
 
     # Extract postsubmit job names
-    for repo_jobs in config.get('postsubmits', {}).values():
+    for repo_jobs in (config.get('postsubmits') or {}).values():
         jobs.update(_extract_job_names(repo_jobs))
 
     # Extract periodic job names
-    jobs.update(_extract_job_names(config.get('periodics', [])))
+    jobs.update(_extract_job_names(config.get('periodics') or []))
 
     return jobs
 

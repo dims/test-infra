@@ -61,6 +61,8 @@ lambda_launch() {
     --wait-ssh)
   LAMBDA_INSTANCE_IP=$(echo "${launch_output}" | jq -r '.ip')
   LAMBDA_INSTANCE_ID=$(echo "${launch_output}" | jq -r '.id')
+  LAMBDA_GPU_TYPE=$(echo "${launch_output}" | jq -r '.instance_type.name')
+  echo "Launched instance ${LAMBDA_INSTANCE_ID} (${LAMBDA_GPU_TYPE}) at ${LAMBDA_INSTANCE_IP}"
 }
 
 # Register cleanup trap (call after lambda_create_ssh_key)
@@ -85,18 +87,33 @@ lambda_rsync_to() {
   rsync -a -e "ssh ${LAMBDA_SSH_OPTS[*]} -i ${LAMBDA_SSH_KEY}" "$@"
 }
 
+# Detect the Lambda instance's CPU architecture (call after lambda_launch).
+# Sets LAMBDA_ARCH to "amd64" or "arm64".
+lambda_detect_arch() {
+  local uname_m
+  uname_m=$(lambda_remote uname -m)
+  case "${uname_m}" in
+    x86_64)  LAMBDA_ARCH="amd64" ;;
+    aarch64) LAMBDA_ARCH="arm64" ;;
+    *)       LAMBDA_ARCH="amd64"; echo "WARNING: unknown arch '${uname_m}', defaulting to amd64" ;;
+  esac
+  echo "Detected Lambda instance architecture: ${LAMBDA_ARCH} (uname -m: ${uname_m})"
+}
+
 # Download k8s release binaries to a local directory
 # Usage: lambda_download_k8s /tmp/k8s-bins [version]
+# Requires: LAMBDA_ARCH set (call lambda_detect_arch first)
 lambda_download_k8s() {
   local dest="$1"
   local version="${2:-$(curl -sSfL https://dl.k8s.io/release/stable.txt)}"
+  local arch="${LAMBDA_ARCH:-amd64}"
   mkdir -p "${dest}"
   for bin in kubeadm kubelet kubectl; do
-    curl -sSfL "https://dl.k8s.io/release/${version}/bin/linux/amd64/${bin}" \
+    curl -sSfL "https://dl.k8s.io/release/${version}/bin/linux/${arch}/${bin}" \
       -o "${dest}/${bin}"
     chmod +x "${dest}/${bin}"
   done
-  echo "Downloaded k8s ${version} binaries to ${dest}"
+  echo "Downloaded k8s ${version} binaries (${arch}) to ${dest}"
 }
 
 # Collect artifacts from the Lambda instance
@@ -108,10 +125,11 @@ lambda_collect_artifacts() {
   lambda_rsync_to "ubuntu@${LAMBDA_INSTANCE_IP}:${remote_path}" "${local_path}/" || true
 }
 
-# Convenience: init everything (install CLI, create key, register cleanup, launch)
+# Convenience: init everything (install CLI, create key, register cleanup, launch, detect arch)
 lambda_init_and_launch() {
   lambda_install_cli
   lambda_create_ssh_key
   lambda_register_cleanup
   lambda_launch
+  lambda_detect_arch
 }

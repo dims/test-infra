@@ -37,11 +37,14 @@ sudo apt-get install -y -qq \
   iptables iproute2 conntrack ebtables kmod socat ethtool \
   jq rsync psmisc curl wget git
 
+# --- Detect architecture ---
+ARCH=$(uname -m | sed -e 's,x86_64,amd64,' -e 's,aarch64,arm64,')
+
 # --- CNI plugins ---
 CNI_VERSION=$(curl -s https://api.github.com/repos/containernetworking/plugins/releases/latest \
   | grep tag_name | cut -d'"' -f4)
 sudo mkdir -p /opt/cni/bin
-curl -sL "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-linux-amd64-${CNI_VERSION}.tgz" \
+curl -sL "https://github.com/containernetworking/plugins/releases/download/${CNI_VERSION}/cni-plugins-linux-${ARCH}-${CNI_VERSION}.tgz" \
   | sudo tar -C /opt/cni/bin -xz
 
 # --- CNI networking ---

@@ -54,14 +54,14 @@ presubmits:
             cpu: "4"
             memory: "8Gi"
 
-  # Opt-in variant pinned to gpu_1x_gh200 (arm64). Not always_run because the
-  # GPU_TYPE="" presubmit above already runs on every PR and may land on a
-  # GH200 by chance; this job exists for explicit arm64 coverage on demand via
-  # `/test pull-dra-driver-nvidia-gpu-e2e-lambda-gpu-gh200`.
+  # Variant pinned to gpu_1x_gh200 (arm64). Runs on every PR to guarantee
+  # arm64 coverage; the GPU_TYPE="" presubmit above picks whatever instance
+  # type Lambda has spare and rarely lands on gh200 in practice. Kept
+  # optional so a gh200 stockout or arm64-only flake doesn't gate merges.
   - name: pull-dra-driver-nvidia-gpu-e2e-lambda-gpu-gh200
     cluster: k8s-infra-prow-build
     optional: true
-    always_run: false
+    always_run: true
     max_concurrency: 1
     skip_branches:
     - release-\d+\.\d+

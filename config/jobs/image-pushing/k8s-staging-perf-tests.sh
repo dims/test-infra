@@ -55,7 +55,7 @@ for image in "${IMAGES[@]}"; do
       spec:
         serviceAccountName: gcb-builder
         containers:
-          - image: gcr.io/k8s-staging-test-infra/image-builder:v20250914-3092127382
+          - image: gcr.io/k8s-staging-test-infra/image-builder:v20260419-39c657fdbf
             command:
               - /run.sh
             args:
@@ -72,3 +72,34 @@ for image in "${IMAGES[@]}"; do
                 value: "${image}"
 EOF
 done
+
+# perfdash is not a util-images image; it has its own cloudbuild.yaml at perfdash/.
+cat >>"${OUTPUT}" <<'PERFDASH'
+    - name: post-kubernetes-push-perf-tests-perfdash
+      rerun_auth_config:
+        github_team_slugs:
+          - org: kubernetes
+            slug: sig-scalability-leads
+      cluster: k8s-infra-prow-build-trusted
+      annotations:
+        testgrid-dashboards: sig-scalability-perf-tests, sig-k8s-infra-gcb
+      decorate: true
+      # we only need to run if perfdash has been changed.
+      run_if_changed: '^perfdash/'
+      branches:
+        - ^master$
+      spec:
+        serviceAccountName: gcb-builder
+        containers:
+          - image: gcr.io/k8s-staging-test-infra/image-builder:v20260419-39c657fdbf
+            command:
+              - /run.sh
+            args:
+              # this is the project GCB will run in, which is the same as the GCR
+              # images are pushed to.
+              - --project=k8s-staging-perf-tests
+              # This is the same as above, but with -gcb appended.
+              - --scratch-bucket=gs://k8s-staging-perf-tests-gcb
+              - --build-dir=.
+              - perfdash
+PERFDASH

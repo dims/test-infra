@@ -86,7 +86,7 @@ periodics:
       - name: CONTROL_PLANE_COUNT
         value: "1"
       - name: CONTROL_PLANE_SIZE
-        value: "c8a.12xlarge"
+        value: "c8a.12xlarge,c7a.12xlarge,c6a.12xlarge,c7i.12xlarge,c6i.12xlarge"
       - name: ENABLE_PROMETHEUS_SERVER
         value: "true"
       - name: TEAR_DOWN_PROMETHEUS_SERVER
@@ -195,7 +195,7 @@ periodics:
       - name: CONTROL_PLANE_COUNT
         value: "1"
       - name: CONTROL_PLANE_SIZE
-        value: "c8i.24xlarge"
+        value: "c8i.24xlarge,c7i.24xlarge,c6i.24xlarge,c7a.24xlarge,c6a.24xlarge"
       - name: KOPS_CONTROLLER_MANAGER_BURST
         value: "1000"
       - name: KOPS_CONTROLLER_MANAGER_QPS
@@ -299,7 +299,7 @@ presubmits:
         - name: CONTROL_PLANE_COUNT
           value: "1"
         - name: CONTROL_PLANE_SIZE
-          value: "c8a.12xlarge"
+          value: "c8a.12xlarge,c7a.12xlarge,c6a.12xlarge,c7i.12xlarge,c6i.12xlarge"
         - name: ENABLE_PROMETHEUS_SERVER
           value: "true"
         - name: TEAR_DOWN_PROMETHEUS_SERVER
